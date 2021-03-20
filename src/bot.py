@@ -1,11 +1,11 @@
 import discord
 import os
 import re
+import redis
 import urllib
 
 from requests_html import AsyncHTMLSession
 
-BOT_AUTH_TOKEN_ENV_VAR = 'DISCORD_BOT_AUTH_TOKEN'
 BOT_AUTHOR_NAME = 'TOG Helper'
 GEAR_CHECK_CHANNEL_SUFFIX = 'gear-check'
 LOGS_CHECK_CHANNEL = 'logs-check'
@@ -18,8 +18,9 @@ channel_prefix_to_zone_id_map = {
 	'naxx': 1006
 }
 
+redis_server = redis.Redis()
 client = discord.Client() # starts the discord client.
-AUTH_TOKEN = str(os.getenv(BOT_AUTH_TOKEN_ENV_VAR))
+AUTH_TOKEN = str(redis_server.get('TOG_BOT_AUTH_TOKEN').decode('utf-8'))
 
 @client.event 
 async def on_ready():

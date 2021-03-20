@@ -1,3 +1,4 @@
 discord
 python-env
+redis
 requests_html
