@@ -3,9 +3,9 @@ import logging
 import os
 import re
 import redis
-import urllib
 
 from requests_html import AsyncHTMLSession
+from urllib import request
 
 BOT_AUTHOR_NAME = 'TOG Helper'
 GEAR_CHECK_CHANNEL_SUFFIX = 'gear-check'
@@ -38,6 +38,7 @@ guild_id_to_outgoing_message_guild_id_map = {
 redis_server = redis.Redis()
 client = discord.Client() # starts the discord client.
 AUTH_TOKEN = str(redis_server.get('TOG_BOT_AUTH_TOKEN').decode('utf-8'))
+WCL_TOKEN = str(redis_server.get('WCL_TOKEN').decode('utf-8'))
 
 @client.event 
 async def on_ready():
@@ -55,6 +56,13 @@ async def on_message(message):
         and message.author.name != BOT_AUTHOR_NAME:
         await handle_gear_check_message(message)
 
+
+SIXTY_UPGRADES_REGEX = "(?P<url>https?://sixtyupgrades.com[^\s]+)"
+SUPPORTED_GEAR_URL_REGEXES = [
+    SIXTY_UPGRADES_REGEX,
+    "(?P<url>https?://classic.wowhead.com/gear-planner/[^\s]+)"
+]
+
 async def handle_gear_check_message(message):
     """
     Handler for incoming gear check messages.
@@ -67,29 +75,34 @@ async def handle_gear_check_message(message):
     if not zone_id:
         return
 
-    try:
-        gear_url = re.search(
-            "(?P<url>https?://sixtyupgrades.com[^\s]+)", message.content
-        ).group("url")
-    except: 
+    gear_url = None
+    for regex in SUPPORTED_GEAR_URL_REGEXES:
+        try:
+            gear_url = re.search(regex, message.content).group("url")
+        except:
+            continue
+
+    if gear_url is None:
         # a message was sent to the channel that wasn't for a gear check
         return
 
-    character_name = await get_character_name(gear_url)
-    wcl_url = get_warcraft_logs_url(message, zone_id, character_name)
+    character_name = await get_character_name(gear_url, message)
+    wcl_url = get_warcraft_logs_url(zone_id, character_name)
+
+    wcl_message = f'Please also check their [raid logs]({wcl_url}).' if wcl_url is not None \
+                  else f'Raid logs could not be retrieved for character: {character_name}'
     embed = discord.Embed()
     embed.add_field(
         name=f'{message.author.display_name} just submitted a gear check request in ' + \
              f'{message.channel.name}:',
-        value=f'You can view it [here]({message.jump_url}). \n Please also check ' + \
-              f'their [raid logs]({wcl_url}).'
+        value=f'You can view it [here]({message.jump_url}). \n {wcl_message}'
     )
 
     outgoing_channel = get_outgoing_channel(message)
     await outgoing_channel.send(embed=embed)
 
 
-async def get_character_name(gear_url):
+async def get_character_name(gear_url, message):
     """
     It is *sometimes* the case that discord users don't update their username 
     to be their character name (eg for alts).
@@ -100,12 +113,14 @@ async def get_character_name(gear_url):
     This assumes a specific format of the page: player names are nested in
     an h3 element with css class named 'class-[player class]'
 
-    Returns the character's name if successful.
+    Returns the character's name if successful, otherwise returns the message sender's
+    display name in discord.
     """
+    name = message.author.display_name
+    if not re.match(SIXTY_UPGRADES_REGEX, gear_url):
+        return name
+
     asession = AsyncHTMLSession()
-
-    name = None
-
     for i in range(MAX_FETCH_CHARACTER_NAME_RETRIES):
         try:
             webpage = await asession.get(gear_url)
@@ -119,13 +134,25 @@ async def get_character_name(gear_url):
             await asession.close()
     return name
 
-def get_warcraft_logs_url(message, zone_id, character_name):
+def get_warcraft_logs_url(zone_id, character_name):
     """ 
     Returns the warcraft logs url for the player with the given character name 
-    (or discord name if the character name was None) and the given zone id.
+    and the given zone id.
+
+    Returns None if warcraft logs could not be found for the given character.
     """
+    parse_url = f'https://classic.warcraftlogs.com:443/v1/parses/character/' + \
+                f'{character_name}/faerlina/US' + \
+                f'?zone={zone_id}&api_key={WCL_TOKEN}'
+    try:
+        res = request.urlopen(parse_url)
+        if res.status != 200:
+            return None
+    except Exception as e:
+        print(e)
+        return None
     return 'https://classic.warcraftlogs.com/character/us/faerlina/' + \
-           f'{character_name or message.author.display_name}?zone={zone_id}';
+           f'{character_name}?zone={zone_id}'
 
 
 def get_outgoing_channel(message):
