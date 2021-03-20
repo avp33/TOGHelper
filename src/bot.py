@@ -51,7 +51,7 @@ async def handle_gear_check_message(message):
 		return
 
 	try:
-		gear_url = re.search("(?P<url>https?://[^\s]+)", message.content).group("url")
+		gear_url = re.search("(?P<url>https?://sixtyupgrades.com[^\s]+)", message.content).group("url")
 	except: 
 		return
 
