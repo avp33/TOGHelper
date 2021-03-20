@@ -73,7 +73,7 @@ async def handle_gear_check_message(message):
     wcl_url = get_warcraft_logs_url(message, zone_id, character_name)
     embed = discord.Embed()
     embed.add_field(
-        name=f'{message.author.name} just submitted a gear check request in ' + \
+        name=f'{message.author.display_name} just submitted a gear check request in ' + \
              f'{message.channel.name}:',
         value=f'You can view it [here]({message.jump_url}). \n Please also check ' + \
               f'their [raid logs]({wcl_url}).'
