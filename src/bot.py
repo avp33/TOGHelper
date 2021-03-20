@@ -52,6 +52,10 @@ async def handle_gear_check_message(message):
 
 	try:
 		gear_url = re.search("(?P<url>https?://[^\s]+)", message.content).group("url")
+	except: 
+		return
+
+	try:
 		character_name = await get_character_name(gear_url)
 	except Exception as e:
 		print(e)
