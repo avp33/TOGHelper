@@ -10,6 +10,12 @@ from requests_html import AsyncHTMLSession
 BOT_AUTHOR_NAME = 'TOG Helper'
 GEAR_CHECK_CHANNEL_SUFFIX = 'gear-check'
 
+# There seems to be an odd bug (either with requests_html or with caching in sixtyupgrades)
+# where sometimes on the first load of a gear check url,
+# we don't actually render the page, so the dom query fails. 
+# Subsequent tries seem to work, though, so we will retry up to this many times. 
+MAX_FETCH_CHARACTER_NAME_RETRIES = 5
+
 # TODO: ideally this should be configurable when you add the bot to your server
 OUTGOING_GEAR_CHECK_CHANNEL = 'pugs-gear-check'
 
@@ -99,15 +105,18 @@ async def get_character_name(gear_url):
     asession = AsyncHTMLSession()
 
     name = None
-    try:
-        webpage = await asession.get(gear_url)
-        await webpage.html.arender()
-        query_selector = "h3[class^='class-']"
-        name = webpage.html.find(query_selector, first=True).text
-    except Exception as e:
-        logging.error(e)
-    finally:
-        await asession.close()
+
+    for i in range(MAX_FETCH_CHARACTER_NAME_RETRIES):
+        try:
+            webpage = await asession.get(gear_url)
+            await webpage.html.arender()
+            query_selector = "h3[class^='class-']"
+            name = webpage.html.find(query_selector, first=True).text
+            break
+        except Exception as e:
+            logging.error(e)
+        finally:
+            await asession.close()
     return name
 
 def get_warcraft_logs_url(message, zone_id, character_name):
