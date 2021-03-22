@@ -120,9 +120,9 @@ async def get_character_name(gear_url, message):
     if not re.match(SIXTY_UPGRADES_REGEX, gear_url):
         return name
 
-    asession = AsyncHTMLSession()
     for i in range(MAX_FETCH_CHARACTER_NAME_RETRIES):
         try:
+            asession = AsyncHTMLSession()
             webpage = await asession.get(gear_url)
             await webpage.html.arender()
             query_selector = "h3[class^='class-']"
