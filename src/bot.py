@@ -57,10 +57,10 @@ async def on_message(message):
         await handle_gear_check_message(message)
 
 
-SIXTY_UPGRADES_REGEX = "(?P<url>https?://sixtyupgrades.com[^\s]+)"
+SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com[^\s]+)"
 SUPPORTED_GEAR_URL_REGEXES = [
     SIXTY_UPGRADES_REGEX,
-    "(?P<url>https?://classic.wowhead.com/gear-planner/[^\s]+)"
+    "(?P<url>https?://([^\s]+.)?classic.wowhead.com/gear-planner/[^\s]+)"
 ]
 
 async def handle_gear_check_message(message):
