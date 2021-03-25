@@ -59,9 +59,10 @@ async def on_message(message):
 
 SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com[^\s]+)"
 PRIVATE_SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com/character/[^\s]+)"
+WOWHEAD_GEAR_CHECK_REGEX = "(?P<url>https?://([^\s]+.)?classic.wowhead.com/gear-planner/[^\s]+)"
 SUPPORTED_GEAR_URL_REGEXES = [
     SIXTY_UPGRADES_REGEX,
-    "(?P<url>https?://([^\s]+.)?classic.wowhead.com/gear-planner/[^\s]+)"
+    WOWHEAD_GEAR_CHECK_REGEX,
 ]
 
 async def handle_gear_check_message(message):
@@ -90,8 +91,17 @@ async def handle_gear_check_message(message):
     character_name = await get_character_name(gear_url, message)
 
     if not character_name and re.match(PRIVATE_SIXTY_UPGRADES_REGEX, gear_url):
-        await message.reply(f'{message.author.mention} your link was private. Please post the public link to your gear set.')
+        await message.reply(
+            f'{message.author.mention} your link was private. Please post the ' + \
+            'public link to your gear set.'
+        )
         return
+
+    if not re.match(SIXTY_UPGRADES_REGEX, gear_url):
+        await message.reply(
+            f'{message.author.mention} Please use https://sixtyupgrades.com/ to post your gear. ' + \
+            'Doing this lets us know you know how to follow directions and helps us with our decision making. Thanks!'
+        )
 
     wcl_url = get_warcraft_logs_url(zone_id, character_name)
 
