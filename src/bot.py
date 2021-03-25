@@ -57,7 +57,8 @@ async def on_message(message):
         await handle_gear_check_message(message)
 
 
-SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com[^\s]+)"
+# use 3+ chars after the / so links to sixtyupgrades.com don't trigger the bot
+SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com/[a-zA-Z0-9]{3,}[^\s]+)"
 PRIVATE_SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com/character/[^\s]+)"
 WOWHEAD_GEAR_CHECK_REGEX = "(?P<url>https?://([^\s]+.)?classic.wowhead.com/gear-planner/[^\s]+)"
 SUPPORTED_GEAR_URL_REGEXES = [
