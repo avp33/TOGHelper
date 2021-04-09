@@ -1,4 +1,4 @@
 # TOGHelper
-A discord bot for The Other Guys
+A discord bot for The Other Guys, built using discord.py
 
-Currently assumes certain channel names are being used and that players are on Faerlina.
+Gear checking assumes certain channel names are being used and that players are on Faerlina.
