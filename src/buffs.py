@@ -33,8 +33,8 @@ buff_channels_to_listeners_map = {
 def is_buff_message(message):
     """ Returns whether the given message is a buff message that has listeners"""
     listeners = buff_channels_to_listeners_map.get(message.channel.id, [])
-    is_from_admin = message.author.guild_permissions.administrator
-    return len(listeners) > 0 and is_from_admin and message.mention_everyone
+    can_mention_everyone = message.author.guild_permissions.mention_everyone
+    return len(listeners) > 0 and can_mention_everyone and message.mention_everyone
 
 
 async def handle_buff_message(message, client):
