@@ -48,7 +48,7 @@ async def handle_buff_message(message, client):
         )
         try:
             await channel.send(embed=embed)
-            await channel.send(channel.guild.default_role)
+            await channel.send('@here')
         except Exception as e:
             logging.error(e)
 
