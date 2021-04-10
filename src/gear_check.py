@@ -143,9 +143,17 @@ def get_warcraft_logs_url(zone_id, character_name, wcl_token):
     Returns None if warcraft logs could not be found for the given character.
     """
     parse_url = f'https://classic.warcraftlogs.com:443/v1/parses/character/' + \
-                f'{character_name}/faerlina/US' + \
-                f'?zone={zone_id}&api_key={wcl_token}'
-    return parse_url
+            f'{character_name}/faerlina/US' + \
+            f'?zone={zone_id}&api_key={wcl_token}'
+    try:
+        res = request.urlopen(parse_url)
+        if res.status != 200:
+            return None
+    except Exception as e:
+        print(e)
+        return None
+    return 'https://classic.warcraftlogs.com/character/us/faerlina/' + \
+           f'{character_name}?zone={zone_id}'
 
 
 def get_outgoing_channel(message, client):
