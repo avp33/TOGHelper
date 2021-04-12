@@ -5,7 +5,6 @@ import logging
 from requests_html import AsyncHTMLSession
 from urllib import request
 
-from constants import Constants
 from models import get_or_create_guild_config
 
 def is_buff_message(message, bot, redis_server):
