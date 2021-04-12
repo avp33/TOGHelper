@@ -48,4 +48,4 @@ After that command is run, if you no longer want to receive forwarded messages, 
 
 
 ## Need more help with commands?
-Use tog.help in your discord server to find out more about the different commands
+Use tog.help in your discord server or in a DM to the TOG Helper bot to find out more about the different commands
