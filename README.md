@@ -24,7 +24,7 @@ Once that is done, go to the channel in the server that you want messages forwar
 
 An example of using this command is 'tog.setup_gear_check 806389180162506802 Faerlina', where the first argument is the id of the server that will be receiving gear check requests, and the second is the name of your server (NA is the only supported region currently).
 
-To get the id of your server, follow (these steps) [https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-].
+To get the id of your server, follow [these steps](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
 After that command is run, if you no longer want to receive forwarded messages, you can run 'tog.remove_gear_check 806389180162506802', where the only argument is the id of the server that you want to stop receiving messages from.
 
@@ -41,7 +41,7 @@ Once that is done, go to the channel in the server that you want messages forwar
 
 An example of using this command is 'tog.setup_buff_alerts 795575592501379073' where the number is the id of the channel on another serverthat you want to receive buff alerts from.
 
-To get the id of a channel, follow (these steps) [https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-].
+To get the id of a channel, follow [these steps](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
 After that command is run, if you no longer want to receive forwarded messages, you can run 'tog.remove_buff_alerts 795575592501379073', where the only argument is the id of the channel that you want to stop receiving messages from.
 
