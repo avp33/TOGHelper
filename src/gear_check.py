@@ -39,7 +39,9 @@ channel_prefix_to_zone_id_map = {
 def is_gear_check_message(message):
     """Returns whether the given message was sent in a gear check channel"""
     try: 
-        return message.channel.name.endswith(GEAR_CHECK_CHANNEL_SUFFIX)
+        channel_name = message.channel.name
+        components = channel_name.split(GEAR_CHECK_CHANNEL_SUFFIX)
+        return components[-1] == GEAR_CHECK_CHANNEL_SUFFIX and components[0] in channel_prefix_to_zone_id_map
     except Exception as e:
         logging.error(e)
         return False
