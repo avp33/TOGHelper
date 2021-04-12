@@ -9,7 +9,7 @@ from urllib import request
 
 from models import get_or_create_guild_config
 
-GEAR_CHECK_CHANNEL_SUFFIX = 'gear-check'
+GEAR_CHECK_CHANNEL_SUFFIX = '-gear-check'
 
 # use 3+ chars after the / so links to sixtyupgrades.com don't trigger the bot
 SIXTY_UPGRADES_REGEX = "(?P<url>https?://([^\s]+.)?sixtyupgrades.com/[a-zA-Z0-9]{3,}[^\s]+)"
@@ -40,7 +40,7 @@ def is_gear_check_message(message):
     try: 
         channel_name = message.channel.name
         components = channel_name.split(GEAR_CHECK_CHANNEL_SUFFIX)
-        return components[-1] == GEAR_CHECK_CHANNEL_SUFFIX and components[0] in channel_prefix_to_zone_id_map
+        return components[-1] == '' and components[0] in channel_prefix_to_zone_id_map
     except Exception as e:
         logging.error(e)
         return False
