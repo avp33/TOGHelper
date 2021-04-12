@@ -35,7 +35,7 @@ Buff alerting currently allows you to have messages that notify @everyone or @he
 
 
 ## Configuring buff alerts
-To enable gear checking on your server, you will want to be sure that TOG Helper has been added to both the server that players are posting alerts to as well as the server that will have the messages forwarded to it.
+To enable buff alerts on your server, you will want to be sure that TOG Helper has been added to both the server that players are posting alerts to as well as the server that will have the messages forwarded to it.
 
 Once that is done, go to the channel in the server that you want messages forward to, and use the tog.setup_buff_alerts comand.
 
