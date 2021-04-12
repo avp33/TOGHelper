@@ -39,7 +39,7 @@ To enable buff alerts on your server, you will want to be sure that TOG Helper h
 
 Once that is done, go to the channel in the server that you want messages forward to, and use the tog.setup_buff_alerts comand.
 
-An example of using this command is 'tog.setup_buff_alerts 795575592501379073' where the number is the id of the channel on another serverthat you want to receive buff alerts from.
+An example of using this command is 'tog.setup_buff_alerts 795575592501379073' where the number is the id of the channel on another server that you want to receive buff alerts from.
 
 To get the id of a channel, follow [these steps](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
