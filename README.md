@@ -2,7 +2,7 @@
 
 A discord bot originally built for The Other Guys using discord.py. Now it can be used by any guild that wants to use it.
 
-Note that the convention of referring to "Guilds" is really referring to Discord servers. This is for consistency with discord.py / the discord api.
+Note that the convention of referring to "Guilds" in code is really referring to Discord servers. This is for consistency with discord.py / the discord api.
 
 ## Adding the bot to your server
 [Go to this URL](https://discord.com/api/oauth2/authorize?client_id=822262145412628521&permissions=199808&scope=bot) to authorize the bot on your server. The permissions that are selected here are all used by the bot, so please leave them checked to make sure everything works as expected
