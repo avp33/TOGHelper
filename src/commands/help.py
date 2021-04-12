@@ -12,7 +12,9 @@ class TOGHelpCommand(commands.MinimalHelpCommand):
     async def send_pages(self):
         """The default help command for this bot"""
         channel = self.get_destination()
-        await channel.send('Here is a help message')
+        for page in self.paginator.pages:
+            embed = discord.Embed(description=page)
+            await channel.send(embed=embed)
 
 
 class HelpCommandCog(commands.Cog):

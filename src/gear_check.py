@@ -8,6 +8,7 @@ from requests_html import AsyncHTMLSession
 from urllib import request
 
 from constants import Constants
+from models import get_or_create_guild_config
 
 GEAR_CHECK_CHANNEL_SUFFIX = 'gear-check'
 
@@ -27,7 +28,7 @@ SUPPORTED_GEAR_URL_REGEXES = [
 MAX_FETCH_CHARACTER_NAME_RETRIES = 5
 
 # TODO: ideally this should be configurable when you add the bot to your server
-OUTGOING_GEAR_CHECK_CHANNEL = 'pugs-gear-check'
+# OUTGOING_GEAR_CHECK_CHANNEL = 'pugs-gear-check'
 
 # maps a channel prefix like 'mc' to the corresponding zone id in warcraft logs
 channel_prefix_to_zone_id_map = {
@@ -40,10 +41,10 @@ channel_prefix_to_zone_id_map = {
 # maps the id of the server that we are receiving messages on to 
 # the id of the server that we will send the message to in a logs-check channel.
 # TODO: ideally this should be configurable when you add the bot to your server
-guild_id_to_outgoing_message_guild_id_map = {
-    822265121606336512: Constants.ALPHADECAY_LISTENER_TEST_SERVER, # maps between my two test servers
-    806389180162506802: Constants.TOG_GUILD_ID, # maps between TOG Pugs and TOG main server
-}
+# guild_id_to_outgoing_message_guild_id_map = {
+#     822265121606336512: Constants.ALPHADECAY_LISTENER_TEST_SERVER, # maps between my two test servers
+#     806389180162506802: Constants.TOG_GUILD_ID, # maps between TOG Pugs and TOG main server
+# }
 
 def is_gear_check_message(message):
     """Returns whether the given message was sent in a gear check channel"""
@@ -53,13 +54,17 @@ def is_gear_check_message(message):
         logging.error(e)
         return False
 
-async def handle_gear_check_message(message, bot, wcl_token):
+async def handle_gear_check_message(message, bot, wcl_token, redis_server):
     """
     Handler for incoming gear check messages.
 
     Parses the message and sends a message with a link to the original 
     as well as a link to the player's warcraft logs for the relevant raid.
-    """     
+    """
+    destination_infos = get_destination_infos(message, bot, redis_server)
+    if len(destination_infos) == 0:
+        return
+
     channel_prefix = str(message.channel).split('-')[0]
     zone_id = channel_prefix_to_zone_id_map.get(channel_prefix, None)
     if not zone_id:
@@ -91,19 +96,20 @@ async def handle_gear_check_message(message, bot, wcl_token):
             'Doing this lets us know you know how to follow directions and helps us with our decision making. Thanks!'
         )
 
-    wcl_url = get_warcraft_logs_url(zone_id, character_name, wcl_token)
+    for destination_info in destination_infos:
+        wcl_url = get_warcraft_logs_url(zone_id, character_name, wcl_token, destination_info.realm)
 
-    wcl_message = f'Please also check their [raid logs]({wcl_url}).' if wcl_url is not None \
+        wcl_message = f'Please also check their [raid logs]({wcl_url}).' if wcl_url is not None \
                   else f'Raid logs could not be retrieved for character: {character_name}'
-    embed = discord.Embed()
-    embed.add_field(
-        name=f'{message.author.display_name} just submitted a gear check request in ' + \
-             f'{message.channel.name}:',
-        value=f'You can view it [here]({message.jump_url}). \n {wcl_message}'
-    )
-
-    outgoing_channel = get_outgoing_channel(message, bot)
-    await outgoing_channel.send(embed=embed)
+        embed = discord.Embed()
+        embed.add_field(
+            name=f'{message.author.display_name} just submitted a gear check request in ' + \
+                 f'{message.channel.name}:',
+            value=f'You can view it [here]({message.jump_url}). \n {wcl_message}'
+        )
+        guild = discord.utils.get(bot.guilds, id=destination_info.destination_guild_id)
+        channel = discord.utils.get(guild.channels, id=destination_info.destination_channel_id)
+        await channel.send(embed=embed)
 
 
 async def get_character_name(gear_url, message):
@@ -139,7 +145,7 @@ async def get_character_name(gear_url, message):
     return name
 
 
-def get_warcraft_logs_url(zone_id, character_name, wcl_token):
+def get_warcraft_logs_url(zone_id, character_name, wcl_token, realm):
     """ 
     Returns the warcraft logs url for the player with the given character name 
     and the given zone id.
@@ -147,7 +153,7 @@ def get_warcraft_logs_url(zone_id, character_name, wcl_token):
     Returns None if warcraft logs could not be found for the given character.
     """
     parse_url = f'https://classic.warcraftlogs.com:443/v1/parses/character/' + \
-            f'{character_name}/faerlina/US' + \
+            f'{character_name}/{realm}/US' + \
             f'?zone={zone_id}&api_key={wcl_token}'
     try:
         res = request.urlopen(parse_url)
@@ -156,24 +162,14 @@ def get_warcraft_logs_url(zone_id, character_name, wcl_token):
     except Exception as e:
         print(e)
         return None
-    return 'https://classic.warcraftlogs.com/character/us/faerlina/' + \
+    return f'https://classic.warcraftlogs.com/character/us/{realm}/' + \
            f'{character_name}?zone={zone_id}'
 
 
-def get_outgoing_channel(message, bot):
+def get_destination_infos(message, bot, redis_server):
     """
-    Returns the channel to send the gear check message to for the given incoming message.
+    Returns the destination GearCheckConfigurationInfos should receive the gear check message.
     """
-    # fall back to the same guild (server) if it wasn't in the map 
-    outgoing_guild_id = guild_id_to_outgoing_message_guild_id_map.get(
-        message.guild.id, message.guild.id
-    )
+    guild_config = get_or_create_guild_config(redis_server, message.guild.id)
+    return guild_config.source_config.gear_check_infos or []
 
-    outgoing_guild = discord.utils.get(bot.guilds, id=outgoing_guild_id)
-    if not outgoing_guild: 
-        return
-
-    outgoing_channel = discord.utils.get(
-        outgoing_guild.channels, name=OUTGOING_GEAR_CHECK_CHANNEL
-    )
-    return outgoing_channel

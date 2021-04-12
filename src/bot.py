@@ -17,17 +17,19 @@ from gear_check import (
 
 BOT_AUTHOR_ID = 822262145412628521
 COMMAND_PREFIX = 'tog.'
+redis_server = redis.Redis()
 
 bot = Bot(command_prefix=COMMAND_PREFIX)
 bot.add_cog(HelpCommandCog(bot))
+bot.add_cog(FeatureConfigurationCog(bot, redis_server))
 
-redis_server = redis.Redis()
 AUTH_TOKEN = str(redis_server.get('TOG_BOT_AUTH_TOKEN').decode('utf-8'))
 WCL_TOKEN = str(redis_server.get('WCL_TOKEN').decode('utf-8'))
 
 @bot.event 
 async def on_ready():
     logging.debug(f'Successful Launch! {bot.user}')
+
 
 @bot.event
 async def on_message(message):
@@ -37,17 +39,15 @@ async def on_message(message):
     Depending on the channel that the message was sent to and the message's author,
     we may send additional messages from our bot in response.
     """
-    logging.error('in msg handler')
     try:
         if message.author.id == BOT_AUTHOR_ID:
             return
         elif is_gear_check_message(message):
-            return await handle_gear_check_message(message, bot, WCL_TOKEN)
-        elif is_buff_message(message):
-            return await handle_buff_message(message, bot)
+            return await handle_gear_check_message(message, bot, WCL_TOKEN, redis_server)
+        elif is_buff_message(message, bot, redis_server):
+            return await handle_buff_message(message, bot, redis_server)
     except Exception as e:
         logging.error(e)
-    logging.error('processing commands now')
     await bot.process_commands(message)
 
 # this blocks and should be the last line in our file
