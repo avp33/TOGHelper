@@ -8,23 +8,6 @@ from urllib import request
 from constants import Constants
 from models import get_or_create_guild_config
 
-# TODO: remove once migrated
-# TOG_BUFF_LISTENER_CHANNEL = 821529167286894612
-# tog_listener_info = GuildAndChannelInfoWrapper(
-#     Constants.TOG_GUILD_ID,
-#     TOG_BUFF_LISTENER_CHANNEL
-# )
-
-# test_listener_info = GuildAndChannelInfoWrapper(
-#     Constants.ALPHADECAY_LISTENER_TEST_SERVER,
-#     830130841555697754
-# )
-
-# buff_channels_to_listeners_map = {
-#     795575592501379073: [tog_listener_info],
-#     830131836420227102: [test_listener_info]
-# }
-
 def is_buff_message(message, bot, redis_server):
     """ Returns whether the given message is a buff message that has listeners"""
     try:

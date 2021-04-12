@@ -27,8 +27,6 @@ SUPPORTED_GEAR_URL_REGEXES = [
 # Subsequent tries seem to work, though, so we will retry up to this many times. 
 MAX_FETCH_CHARACTER_NAME_RETRIES = 5
 
-# TODO: ideally this should be configurable when you add the bot to your server
-# OUTGOING_GEAR_CHECK_CHANNEL = 'pugs-gear-check'
 
 # maps a channel prefix like 'mc' to the corresponding zone id in warcraft logs
 channel_prefix_to_zone_id_map = {
@@ -37,14 +35,6 @@ channel_prefix_to_zone_id_map = {
     'aq40': 1005,
     'naxx': 1006
 }
-
-# maps the id of the server that we are receiving messages on to 
-# the id of the server that we will send the message to in a logs-check channel.
-# TODO: ideally this should be configurable when you add the bot to your server
-# guild_id_to_outgoing_message_guild_id_map = {
-#     822265121606336512: Constants.ALPHADECAY_LISTENER_TEST_SERVER, # maps between my two test servers
-#     806389180162506802: Constants.TOG_GUILD_ID, # maps between TOG Pugs and TOG main server
-# }
 
 def is_gear_check_message(message):
     """Returns whether the given message was sent in a gear check channel"""
