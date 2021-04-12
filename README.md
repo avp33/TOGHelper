@@ -5,7 +5,7 @@ A discord bot originally built for The Other Guys using discord.py. Now it can b
 Note that the convention of referring to "Guilds" in code is really referring to Discord servers. This is for consistency with discord.py / the discord api.
 
 ## Adding the bot to your server
-[Go to this URL](https://discord.com/api/oauth2/authorize?client_id=822262145412628521&permissions=199808&scope=bot) to authorize the bot on your server. The permissions that are selected here are all used by the bot, so please leave them checked to make sure everything works as expected
+[Go to this URL](https://discord.com/api/oauth2/authorize?client_id=822262145412628521&permissions=199808&scope=bot) to authorize the bot on your server. The permissions that are selected here are all used by the bot, so please leave them checked to make sure everything works as expected.
 
 ## Gear checking
 The gear checking feature currently works such that when somebody sends a sixtyupgrades (or wowhead gear planner) link to a channel of the form:
@@ -15,7 +15,7 @@ A link to this message as well as the user's logs will be forwarded to a differe
 ![image](https://user-images.githubusercontent.com/5596048/114349371-a8e68000-9b1c-11eb-9c15-8a1276ab20cc.png)
 
 
-Gear checking will tell users to use sixtyupgrades if they use wowhead instead, as sixtupgrades was TOG's preferred gear checker. It will also tell the user if they posted a sixtyupgrades link that was private.
+Gear checking will tell users to use sixtyupgrades if they use wowhead instead, as sixtyupgrades was TOG's preferred gear checker. It will also tell the user if they posted a sixtyupgrades link that was private.
 
 ## Configuring gear checking
 To enable gear checking on your server, you will want to be sure that TOG Helper has been added to both the server that will be receiving gear check requests and the server that will have the messages forwarded to it.
