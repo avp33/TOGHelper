@@ -46,10 +46,14 @@ guild_id_to_outgoing_message_guild_id_map = {
 }
 
 def is_gear_check_message(message):
-    """Returns whether the given message was sent in a gear check channel""" 
-    return message.channel.name.endswith(GEAR_CHECK_CHANNEL_SUFFIX)
+    """Returns whether the given message was sent in a gear check channel"""
+    try: 
+        return message.channel.name.endswith(GEAR_CHECK_CHANNEL_SUFFIX)
+    except Exception as e:
+        logging.error(e)
+        return False
 
-async def handle_gear_check_message(message, client, wcl_token):
+async def handle_gear_check_message(message, bot, wcl_token):
     """
     Handler for incoming gear check messages.
 
@@ -98,7 +102,7 @@ async def handle_gear_check_message(message, client, wcl_token):
         value=f'You can view it [here]({message.jump_url}). \n {wcl_message}'
     )
 
-    outgoing_channel = get_outgoing_channel(message, client)
+    outgoing_channel = get_outgoing_channel(message, bot)
     await outgoing_channel.send(embed=embed)
 
 
@@ -156,7 +160,7 @@ def get_warcraft_logs_url(zone_id, character_name, wcl_token):
            f'{character_name}?zone={zone_id}'
 
 
-def get_outgoing_channel(message, client):
+def get_outgoing_channel(message, bot):
     """
     Returns the channel to send the gear check message to for the given incoming message.
     """
@@ -165,7 +169,7 @@ def get_outgoing_channel(message, client):
         message.guild.id, message.guild.id
     )
 
-    outgoing_guild = discord.utils.get(client.guilds, id=outgoing_guild_id)
+    outgoing_guild = discord.utils.get(bot.guilds, id=outgoing_guild_id)
     if not outgoing_guild: 
         return
 

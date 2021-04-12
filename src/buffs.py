@@ -32,14 +32,17 @@ buff_channels_to_listeners_map = {
 
 def is_buff_message(message):
     """ Returns whether the given message is a buff message that has listeners"""
-    listeners = buff_channels_to_listeners_map.get(message.channel.id, [])
-    can_mention_everyone = message.author.guild_permissions.mention_everyone
-    return len(listeners) > 0 and can_mention_everyone and message.mention_everyone
+    try:
+        listeners = buff_channels_to_listeners_map.get(message.channel.id, [])
+        can_mention_everyone = message.author.guild_permissions.mention_everyone
+        return len(listeners) > 0 and can_mention_everyone and message.mention_everyone
+    except Exception as e:
+        logging.error(e)
+        return False
 
-
-async def handle_buff_message(message, client):
+async def handle_buff_message(message, bot):
     """Handles the incoming message, forwarding it in an embed to any listening channels"""
-    outgoing_channels = get_listener_channels(message, client)
+    outgoing_channels = get_listener_channels(message, bot)
     for channel in outgoing_channels:
         embed = discord.Embed()
         embed.add_field(
@@ -53,12 +56,12 @@ async def handle_buff_message(message, client):
             logging.error(e)
 
 
-def get_listener_channels(message, client):
+def get_listener_channels(message, bot):
     """ Returns a list of Channels that are listening for buff messages """
     listeners = buff_channels_to_listeners_map.get(message.channel.id, [])
     channels = []
     for listener_info in listeners: 
-        guild = discord.utils.get(client.guilds, id=listener_info.guild_id)
+        guild = discord.utils.get(bot.guilds, id=listener_info.guild_id)
         channel = discord.utils.get(guild.channels, id=listener_info.channel_id)
         channels.append(channel)
     return channels
