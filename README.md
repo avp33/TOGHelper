@@ -39,11 +39,13 @@ To enable buff alerts on your server, you will want to be sure that TOG Helper h
 
 Once that is done, go to the channel in the server that you want messages forward to, and use the tog.setup_buff_alerts comand.
 
-An example of using this command is 'tog.setup_buff_alerts 795575592501379073' where the number is the id of the channel on another server that you want to receive buff alerts from.
+An example of using this command is 'tog.setup_buff_alerts 795575592501379073 832414160410640454'. The first number is the id of the channel on another server that you want to receive buff alerts from. The second number is optional, but if you only want a specific role to be notified of buff alerts (rather than @here), you can use this so only they receive a notification.
 
 To get the id of a channel, follow [these steps](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID).
 
-After that command is run, if you no longer want to receive forwarded messages, you can run 'tog.remove_buff_alerts 795575592501379073', where the only argument is the id of the channel that you want to stop receiving messages from.
+If you set a role to receive buffs, users can opt into notifications by using tog.buff_me and opt out by using tog.debuff_me
+
+After that command is run, if you no longer want to receive forwarded messages, you can run 'tog.remove_buff_alerts 795575592501379073 832414160410640454', where the first argument is the id of the channel that you want to stop receiving messages from.
 
 
 

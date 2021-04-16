@@ -10,6 +10,7 @@ from utils import (
 from models import (
     get_or_create_guild_config,
     GuildConfiguration,
+    MENTION_ALL_ROLES_ID,
 )
 
 class FeatureConfigurationCog(commands.Cog):
@@ -124,16 +125,17 @@ class FeatureConfigurationCog(commands.Cog):
 
 
     @commands.command()
-    async def setup_buff_alerts(self, ctx, source_channel_id: int):
+    async def setup_buff_alerts(self, ctx, source_channel_id: int, buff_alert_role_id: int = MENTION_ALL_ROLES_ID):
         """
         Configures the bot to send buff alerts from a channel on another server to the 
         channel in which this command is sent.
         
-        One argument should be given:
+        Two arguments should be given (the second is optional):
         - The ID of the channel on another server that will have buff alerts sent to it.
+        - The ID of the role of members that should be notified
 
         Example usage is:
-        tog.setup_buff_alerts 795575592501379073
+        tog.setup_buff_alerts 795575592501379073 832414160410640454
         """ 
         if not ctx.guild:
             return await ctx.send('This command can only be used in the channel of a discord server!')
@@ -143,6 +145,21 @@ class FeatureConfigurationCog(commands.Cog):
             source_channel_id,
             ctx.channel.id
         )
+
+        existing_role_id = dest_guild_config.buff_alert_role_id
+        try:
+            new_role = discord.utils.get(ctx.guild.roles, id=buff_alert_role_id)
+            if not new_role and buff_alert_role_id != MENTION_ALL_ROLES_ID:
+                return await ctx.send(f'There is no role with id {buff_alert_role_id}')
+        except Exception as e:
+            new_role = None
+            logging.error(e)
+
+        if existing_role_id > 0 and buff_alert_role_id != existing_role_id:
+            existing_role = discord.utils.get(ctx.guild.roles, id=existing_role_id)
+            return await ctx.send(
+                f'You already configured your buff alerts role to be {existing_role.name}' + \
+                f' you cannot set it to be {new_role.name}.')
 
         if not add_success:
             return await ctx.send(
@@ -162,11 +179,17 @@ class FeatureConfigurationCog(commands.Cog):
             ctx.guild.id,
             ctx.channel.id
         )
+        dest_guild_config.buff_alert_role_id = buff_alert_role_id
 
         source_channel = discord.utils.get(source_guild.channels, id=source_channel_id)
         self.redis_server.set(ctx.guild.id, convert_to_json_str(dest_guild_config))
         self.redis_server.set(source_guild.id, convert_to_json_str(source_guild_config))
-        await ctx.send(f'This server is now listening for buff alerts from {source_channel.name}.')
+
+        role_message = (
+            f'Members with role {new_role.name} will be notified' \
+            if new_role is not None else 'All online members will be notified'
+        )
+        await ctx.send(f'This server is now listening for buff alerts from {source_channel.name}.\n{role_message}')
 
 
     @commands.command()
@@ -204,9 +227,49 @@ class FeatureConfigurationCog(commands.Cog):
         source_guild_config.source_config.remove_buff_alert_destination(
             ctx.guild.id,
         )
+        dest_guild_config.buff_alert_role_id = MENTION_ALL_ROLES_ID
 
         source_channel = discord.utils.get(source_guild.channels, id=source_channel_id)
         self.redis_server.set(ctx.guild.id, convert_to_json_str(dest_guild_config))
         self.redis_server.set(source_guild.id, convert_to_json_str(source_guild_config))
         await ctx.send(f'This server will no longer receive buff alerts from {source_channel.name}.')
+
+    async def _get_buff_alert_role(self, ctx):
+        guild_config = get_or_create_guild_config(self.redis_server, ctx.guild.id)
+        if guild_config.buff_alert_role_id <= 0:
+            await ctx.send('This server has not set up buff alerts yet.')
+            return None
+        return discord.utils.get(ctx.guild.roles, id=guild_config.buff_alert_role_id)
+
+    @commands.command()
+    async def buff_me(self, ctx):
+        """
+        Command to begin receiving buff alerts on the server this message was sent on.
+        """        
+        if not ctx.guild:
+            return await ctx.send('This command can only be used in the channel of a discord server!')
+        member = ctx.message.author
+        role = await self._get_buff_alert_role(ctx)
+        if len(list(filter(lambda r: r.id == role.id, member.roles))) > 0:
+            return await ctx.send(f'You already have role {role.name}.')
+        if not role:
+            return
+        await member.add_roles(role)
+        return await ctx.send(f'{member.display_name} will now receive buff alerts.')
+
+    @commands.command()
+    async def debuff_me(self, ctx):
+        """
+        Command to stop receiving buff alerts on the server this message was sent on.
+        """
+        if not ctx.guild:
+            return await ctx.send('This command can only be used in the channel of a discord server!')
+        member = ctx.message.author
+        role = await self._get_buff_alert_role(ctx)
+        if len(list(filter(lambda r: r.id == role.id, member.roles))) == 0:
+            return await ctx.send(f'You already did not have the role {role.name}.')
+        if not role:
+            return        
+        await member.remove_roles(role)
+        return await ctx.send(f'{member.display_name} will no longer receive buff alerts.')
 

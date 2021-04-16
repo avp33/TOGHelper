@@ -4,6 +4,8 @@ from utils import (
     JSONSerializable,
 )
 
+MENTION_ALL_ROLES_ID = -1
+
 def convert_json_list_to_objects(json_list, cls: JSONSerializable.__class__):
     if len(json_list) == 0:
         return list()
@@ -169,10 +171,12 @@ class GuildConfiguration(object):
     def __init__(self, 
                  guild_id: int,
                  destination_config: DestinationGuildConfiguration = None, 
-                 source_config: SourceGuildConfiguration = None):
+                 source_config: SourceGuildConfiguration = None,
+                 buff_alert_role_id: int = MENTION_ALL_ROLES_ID):
         self.guild_id = guild_id
         self.destination_config = destination_config or DestinationGuildConfiguration(guild_id)
         self.source_config = source_config or SourceGuildConfiguration(guild_id)
+        self.buff_alert_role_id = buff_alert_role_id
 
     @staticmethod
     def from_json_dict(destination_config,
