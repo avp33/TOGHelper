@@ -1,15 +1,14 @@
 """Commands for configuring certain features to work on a server"""
 import discord
 import logging
+
 from discord.ext import commands
 
 from utils import (
-    convert_json_to_object,
     convert_to_json_str,    
 )
 from models import (
     get_or_create_guild_config,
-    GuildConfiguration,
     MENTION_ALL_ROLES_ID,
 )
 

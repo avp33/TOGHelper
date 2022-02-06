@@ -1,5 +1,6 @@
 """Module containing the help command for the bot"""
 import discord
+
 from discord.ext import commands
 
 class TOGHelpCommand(commands.MinimalHelpCommand):
